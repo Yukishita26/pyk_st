@@ -7,8 +7,13 @@ class WrongSizeError(Exception):
     def __init__(self, text="Size not match"):
         self.text = text
 
+from typing import (List, Union, Optional)
+Number = Union[int, float]
+Ndarray = np.ndarray
+ArrayLike = Union[List[List[Number]], Ndarray]
+
 # hight x width の array_like を length x 1 の array に縮約
-def mean_with_weight(arr, weight=None, axis=0):
+def mean_with_weight(arr:ArrayLike, weight:Optional[List[Number]] = None, axis:int = 0) -> Ndarray:
     if type(arr) == list: arr = np.array(arr)
     hight, width = arr.shape
     #length = arr.shape[1 - axis]
