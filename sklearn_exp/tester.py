@@ -1,8 +1,14 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import itertools
+from pyk_st.math import functional
 
-_seikaku_na_kansuu = lambda x: np.sin(np.pi * x) / np.pi * x + 0.1 * x
+heaviside = lambda x:1*(x>0)
+#_seikaku_na_kansuu = lambda x: np.sin(np.pi * x) / np.pi * x + 0.1 * x
+
+_seikaku_na_kansuu = lambda x:np.sin(x)+0.1*x-0.5*heaviside(x)
 
 def generate_suitably(n:int = 100) -> (np.ndarray, np.ndarray): # 1 x n, 1 x n
     teacher_x = np.array([[6 * np.random.rand() - 3] for _ in range(n)])
@@ -10,6 +16,18 @@ def generate_suitably(n:int = 100) -> (np.ndarray, np.ndarray): # 1 x n, 1 x n
 
     return teacher_x, teacher_y
 
+def generate_suitably2D(n:int = 100) -> (pd.core.frame.DataFrame, pd.core.series.Series): # 2 x n, 1 x n
+    teacher_X = pd.DataFrame([[6 * np.random.rand() - 3, np.random.randn()] for _ in range(n)], columns=['main', 'noise'])
+    teacher_y = _seikaku_na_kansuu(teacher_X['main'].values) + 0.1*teacher_X['noise'].values + 0.1*np.random.randn(n).reshape(-1, 1)
+
+    return teacher_X, teacher_y
+
+def generate_suitably3D(n:int = 100) -> (pd.core.frame.DataFrame, pd.core.series.Series): # 3 x n, 1 x n
+    teacher_X = pd.DataFrame([[6 * np.random.rand() - 3, np.random.randn(), np.random.randn()] for _ in range(n)], columns=['main', 'noise', 'random'])
+    teacher_y = _seikaku_na_kansuu(teacher_X['main'].values) + 0.1*teacher_X['noise'].values + 0.1*np.random.randn(n).reshape(-1, 1)
+
+    return teacher_X, teacher_y
+#%%
 # predictor: sklearn KernelRidge, RandomForest, etc... , whitch has attribute `predict`
 def predictor_parameter_test(predictor, params) -> None:
     keys = list(params.keys())
@@ -34,6 +52,10 @@ def predictor_parameter_test(predictor, params) -> None:
     plt.legend()
 
 if __name__ == "__main__":
+    #内部インポートテスト
+    #plt.plot(np.linspace(-1,1,100), functional.f(np.linspace(-1,1,100)))
+    #plt.show()
+
     from sklearn.kernel_ridge import KernelRidge
 
     rgr = KernelRidge(kernel='rbf', alpha=1.0, gamma=1.0)
